@@ -12,7 +12,7 @@ count = 0
 def process_result(str):
     """
     Process the JSON output from the Twitter API call.
-    Prints out the list of users.
+    Prints out the list of users with protected but not followed timelines.
     """
     jsn = twlib.parse_json(str)
 
@@ -21,14 +21,17 @@ def process_result(str):
 #     pp = pprint.PrettyPrinter(indent=4)
 #     pp.pprint(jsn)
 
+    puser = []
+
     for user in jsn['users']:
 	global count
 
 	if user['protected'] and not user['following']:
 	    count += 1
 	    print "%d: %s %s" % (count, user['id'], user['screen_name'])
+	    puser += [ user['screen_name'] ]
 
-    return cursor
+    return (cursor, puser)
 
 
 def get_pages(user, list, client):
@@ -38,19 +41,63 @@ def get_pages(user, list, client):
     cursor = -1
     page = 0
 
+    puser = []
+
     while True:
 	page += 1
 	print >> sys.stderr, "Getting %s/%s list members page %s..." % (
 		user, list, page)
 
 	listreq = client.createRequest(
-		path="/%s/%s/members.json" % (user, list))
+		path="/1/%s/%s/members.json" % (user, list))
 	result = listreq.get(params = { "cursor" : str(cursor) })
 
-	cursor = process_result(result)
+	( cursor, puser2 ) = process_result(result)
+
+	puser += puser2
+
 	if cursor == 0: break
 
 	time.sleep(1)
+
+    return puser
+
+
+def delete_user(user, list, username, client):
+    """
+    Remove a user from a list.
+    """
+    listreq = client.createRequest(
+	    path = '/1/%s/%s/members.json' % (user, list))
+    result = listreq.post(params = {
+	'list_id' : list,
+	'id' : username,
+	'_method' : 'DELETE',
+	})
+    #print result
+
+    time.sleep(1)
+
+
+def ask_delete(user, list, puser, client):
+    """
+    Given a list of protected but non-followed users, ask whether to remove
+    them from list.
+    """
+    if len(puser) == 0:
+	print "None found."
+	return
+
+    print >> sys.stderr, 'The following users are protected but not followed:'
+    for u in puser:
+	print >> sys.stderr, '  ' + u
+    print >> sys.stderr, 'Remove them from list? (y/n) ',
+
+    resp = raw_input().lstrip().lower()
+    if resp[0] == 'y':
+	for username in puser:
+	    print >> sys.stderr, 'Removing %s from list...' % username
+	    delete_user(user, list, username, client)
 
 
 def main():
@@ -63,7 +110,9 @@ def main():
     
     client = twlib.init_oauth(args.login)
 
-    get_pages(args.user, args.list, client)
+    puser = get_pages(args.user, args.list, client)
+
+    ask_delete(args.user, args.list, puser, client)
 
 
 if __name__ == '__main__':

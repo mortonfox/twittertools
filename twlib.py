@@ -27,8 +27,8 @@ import sys
 
 OAUTH_FILENAME = 'oauth.key'
 
-CONSUMER_KEY = 'VjwGaraEThGrC81x9ZGjfQ'
-CONSUMER_SECRET = 'YlI6JRhqyxP5SFVXXbEbI3G5gO3RKGi68O5i3l7uw'
+CONSUMER_KEY = '12372339LkteH0k9UIhgyA'
+CONSUMER_SECRET = '8X5MGxZ0MPeSdaIZd8vdNVuOE6rCL28eZPzAM66To'
 
 REQUEST_URL = "https://api.twitter.com/oauth/request_token" 
 ACCESS_URL = "https://api.twitter.com/oauth/access_token" 
