@@ -112,9 +112,12 @@ class CmdlineParser:
 	    usagestr = 'usage: %prog [options] ' + \
 		    ' '.join([x[0] for x in self.paramlist])
 		    
-	    paramhelp = 'Positional arguments: ' + \
-		    ', '.join([x[0] + ' = ' + x[1] 
-			for x in self.paramlist])
+	    paramhelp = None
+	    if len(self.paramlist) > 0:
+		paramhelp = 'Positional arguments: ' + \
+			', '.join([x[0] + ' = ' + x[1] 
+			    for x in self.paramlist])
+
 	    parser = optparse.OptionParser(
 		    usage = usagestr, 
 		    description = self.desc,
