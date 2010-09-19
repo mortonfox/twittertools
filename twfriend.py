@@ -52,8 +52,9 @@ def get_pages(client, what):
 	page += 1
 	print >> sys.stderr, "Getting %s page %d..." % (what, page)
 
-	req = client.createRequest(path="/statuses/%s.json" % what)
-	result = req.get(params = { "cursor" : str(cursor) } )
+	result = twlib.twitter_retry(client, 'get',
+		path='/statuses/%s.json' % what,
+		params = { "cursor" : str(cursor) } )
 
 	(cursor, flist2) = process_result(result)
 	flist.update(flist2)  # Add to our cumulative dict.

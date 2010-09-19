@@ -48,9 +48,9 @@ def get_pages(user, list, client):
 	print >> sys.stderr, "Getting %s/%s list members page %s..." % (
 		user, list, page)
 
-	listreq = client.createRequest(
-		path="/1/%s/%s/members.json" % (user, list))
-	result = listreq.get(params = { "cursor" : str(cursor) })
+	result = twlib.twitter_retry(client, 'get',
+		path="/1/%s/%s/members.json" % (user, list),
+		params = { "cursor" : str(cursor) })
 
 	( cursor, puser2 ) = process_result(result)
 
@@ -67,13 +67,13 @@ def delete_user(user, list, username, client):
     """
     Remove a user from a list.
     """
-    listreq = client.createRequest(
-	    path = '/1/%s/%s/members.json' % (user, list))
-    result = listreq.post(params = {
-	'list_id' : list,
-	'id' : username,
-	'_method' : 'DELETE',
-	})
+    result = twlib.twitter_retry(client, 'post',
+	    path = '/1/%s/%s/members.json' % (user, list),
+	    params = {
+		'list_id' : list,
+		'id' : username,
+		'_method' : 'DELETE',
+	    })
     #print result
 
     time.sleep(1)

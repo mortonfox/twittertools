@@ -41,9 +41,9 @@ def get_pages(user, list, client):
 	print >> sys.stderr, "Getting %s/%s list members page %s..." % (
 		user, list, page)
 
-	listreq = client.createRequest(
-		path="/%s/%s/members.json" % (user, list))
-	result = listreq.get(params = { "cursor" : str(cursor) })
+	result = twlib.twitter_retry(client, 'get', 
+		path='/%s/%s/members.json' % (user, list),
+		params = { "cursor" : str(cursor) })
 
 	cursor = process_result(result)
 	if cursor == 0: break

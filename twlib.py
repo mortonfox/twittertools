@@ -44,6 +44,8 @@ def init_oauth(force_login=False):
     	force_login
 	If True, then redo the OAuth handshake even if there is a saved
 	access token. Default is False.
+
+    Returns the client object.
     """
     c = oauthConsumer.Client(
 	    key = CONSUMER_KEY,
@@ -88,6 +90,43 @@ def init_oauth(force_login=False):
     return c
 
 
+import urllib2
+import time
+
+def twitter_retry(client, method, path, params):
+    """
+    Call the Twitter API with exponential back-off retries in the event of
+    API failure.
+
+    Args:
+    client - client object from init_oauth()
+    method - should be "get" or "post"
+    path - API request path
+    params - API params
+    """
+    retry_count = 0
+    retry_delay = 0
+
+    while True:
+	try:
+	    listreq = client.createRequest(path = path)
+	    if method == "post":
+		result = listreq.post(params = params)
+	    else:
+		result = listreq.get(params = params)
+	    return result
+
+	except urllib2.URLError:
+	    if retry_count < 5:
+		retry_count += 1
+		retry_delay = retry_delay * 2 + 1
+
+		print >> sys.stderr, "Retrying in %d seconds..." % retry_delay
+		time.sleep(retry_delay)
+		continue
+	    else:
+		raise
+
 use_optparse = False
 try:
     import argparse
@@ -96,6 +135,10 @@ except ImportError:
     use_optparse = True
 
 class CmdlineParser:
+    """
+    Wrapper for optparse and argparse. Offers a neutral interface that supports
+    both command-line parsing modules and uses whichever one is available.
+    """
     def __init__(self, desc):
 	self.desc = desc
 	self.optionlist = []
