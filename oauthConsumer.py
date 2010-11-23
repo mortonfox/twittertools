@@ -86,7 +86,6 @@ import hashlib
 import base64
 import sys
 
-# from google.appengine.api import urlfetch
 
 class Client ( object ):
 
@@ -134,10 +133,10 @@ class Client ( object ):
     self._sessionSecret = secret
 
   def getSessionToken(self):
-      return self._sessionToken
+    return self._sessionToken
 
   def getSessionSecret(self):
-      return self._sessionSecret
+    return self._sessionSecret
 
   def requestAuth ( self ):
     """
@@ -301,10 +300,8 @@ class Request ( object ):
     data = urllib.urlencode( params )
     if kind == self.POST:
       req = urllib2.Request( url, data )
-      # resp = urlfetch.fetch(url, payload=data, method=urlfetch.POST)
     else:
       req = urllib2.Request( "%s?%s" % ( url, data ) )
-      # resp = urlfetch.fetch( "%s?%s" % ( url, data ), method=urlfetch.GET)
     """
     #DEBUG WITH HTTP PROXY LISTENER:
     proxy_handler = urllib2.ProxyHandler( { 'http':'127.0.0.1:8888' } )
@@ -313,7 +310,6 @@ class Request ( object ):
     """
     resp = urllib2.urlopen( req )
     result = resp.read( )
-    # result = resp.content
     return result
 
   def createSignature ( self, host, path, params, kind ):
