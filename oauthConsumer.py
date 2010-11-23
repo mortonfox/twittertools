@@ -84,10 +84,14 @@ import copy
 import hmac
 import hashlib
 import base64
+import sys
+
+# from google.appengine.api import urlfetch
 
 class Client ( object ):
 
-  def __init__(self, key, secret, requestTokenURL, accessTokenURL, authorizeURL, callbackURL, host=None ):
+  def __init__(self, key, secret, requestTokenURL, accessTokenURL,
+	  authorizeURL, callbackURL, host=None, useHttps=False ):
     """
       Initialize the client
 
@@ -100,6 +104,7 @@ class Client ( object ):
       authorizeURL - the url to which this client instance will return with oauth_token appended to give to the resource owner to authorize access
       callbackURL - the url to provide to the server to let your program know that a user has authorized the client
       host - optional argument, probably better to ignore it
+      useHttps - if True, use https:// when making requests. Otherwise, use http://
 
       If you already have a session token and session secret, after creating an instance use the setSession method instead of requesting
       a new session from the user!
@@ -122,10 +127,17 @@ class Client ( object ):
       self._host = self._requestTokenURL.netloc
     else:
       self._host = host
+    self._useHttps = useHttps
 
   def setSession ( self, token, secret ):
     self._sessionToken = token
     self._sessionSecret = secret
+
+  def getSessionToken(self):
+      return self._sessionToken
+
+  def getSessionSecret(self):
+      return self._sessionSecret
 
   def requestAuth ( self ):
     """
@@ -135,7 +147,10 @@ class Client ( object ):
     params = {
       "oauth_callback": self._callbackURL
     }
-    req = Request( self._key, self._secret, "", params=params, path=self._requestTokenURL.path, host=self._requestTokenURL.netloc )
+    req = Request( self._key, self._secret, "", params=params,
+	    path=self._requestTokenURL.path,
+	    host=self._requestTokenURL.netloc,
+	    useHttps=self._useHttps )
     return self.handleRequestAuth( req.post( ) )
 
   def handleRequestAuth ( self, data ):
@@ -199,8 +214,9 @@ class Client ( object ):
     }
     req = Request( self._key, self._secret, oauth_token,
 	    sessionSecret = self._requestSecret,
-	    params=params, path=self._accessTokenURL.path, host=self._accessTokenURL.netloc )
-    # req = Request( self._key, self._requestSecret, oauth_token, params=params, path=self._accessTokenURL.path, host=self._accessTokenURL.netloc )
+	    params=params, path=self._accessTokenURL.path,
+	    host=self._accessTokenURL.netloc,
+	    useHttps=self._useHttps )
     return self.handleRequestSession( req.post( ) )
 
   def handleRequestSession ( self, data ):
@@ -222,7 +238,9 @@ class Client ( object ):
     if not host:
       host = self._host
     if self._sessionToken:
-      return Request( self._key, self._secret, self._sessionToken , path=path, sessionSecret=self._sessionSecret, params=params, host=host )
+      return Request( self._key, self._secret, self._sessionToken ,
+	      path=path, sessionSecret=self._sessionSecret, params=params,
+	      host=host, useHttps=self._useHttps )
     else:
       raise OauthException( "No Session Token" )
 
@@ -231,7 +249,8 @@ class Request ( object ):
   POST = "POST"
   GET = "GET"
 
-  def __init__( self, key, secret, token, sessionSecret="", path=None, host=None, params=None ):
+  def __init__( self, key, secret, token, sessionSecret="", path=None,
+	  host=None, params=None, useHttps=False ):
     self.host = host
     self.path = path
     self.params = {}
@@ -240,6 +259,7 @@ class Request ( object ):
     self._secret = secret
     self._sessionSecret = sessionSecret
     self._token = token
+    self._protocol = 'https' if useHttps else 'http'
 
   def addParams ( self, params ):
     returnParams = copy.deepcopy( self.params )
@@ -272,7 +292,8 @@ class Request ( object ):
       path = '/' + path
     signature = self.createSignature( host, path, params, kind )
     params.update( { "oauth_signature": signature } )
-    url = "http://%s%s" % ( host, path )
+    url = "%s://%s%s" % ( self._protocol, host, path )
+    # print >> sys.stderr, "url: %s" % url
     _params = { }
     for k, v in params.iteritems( ):
         _params[ str( k ).encode( 'utf-8' ) ] =  v.encode( 'utf-8' )
@@ -280,8 +301,10 @@ class Request ( object ):
     data = urllib.urlencode( params )
     if kind == self.POST:
       req = urllib2.Request( url, data )
+      # resp = urlfetch.fetch(url, payload=data, method=urlfetch.POST)
     else:
       req = urllib2.Request( "%s?%s" % ( url, data ) )
+      # resp = urlfetch.fetch( "%s?%s" % ( url, data ), method=urlfetch.GET)
     """
     #DEBUG WITH HTTP PROXY LISTENER:
     proxy_handler = urllib2.ProxyHandler( { 'http':'127.0.0.1:8888' } )
@@ -290,6 +313,7 @@ class Request ( object ):
     """
     resp = urllib2.urlopen( req )
     result = resp.read( )
+    # result = resp.content
     return result
 
   def createSignature ( self, host, path, params, kind ):
@@ -298,12 +322,12 @@ class Request ( object ):
     values.sort( )
     sig_ = "%s&%s&%s" % (
         kind,
-        self.oauthEncode( "http://%s%s" % ( host, path ), '' ),
+        self.oauthEncode( "%s://%s%s" % ( self._protocol, host, path ), '' ),
         self.oauthEncode( "&".join( ( "=".join( v ) for v in values ) ), '' )
     )
-    # print "sig_: %s" % sig_
+    # print >> sys.stderr, "sig_: %s" % sig_
     hashKey = "&".join( ( self._secret, self._sessionSecret ) )
-    # print "hashKey: %s" % hashKey
+    # print >> sys.stderr, "hashKey: %s" % hashKey
     hash = hmac.new( hashKey, sig_, hashlib.sha1 )
     return base64.b64encode( hash.digest( ) )
 

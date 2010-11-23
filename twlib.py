@@ -53,7 +53,8 @@ def init_oauth(force_login=False):
 	    requestTokenURL = REQUEST_URL,
 	    accessTokenURL = ACCESS_URL, 
 	    authorizeURL = AUTHORIZE_URL, 
-	    callbackURL = "oob")
+	    callbackURL = "oob",
+	    useHttps = True)
 
     if not force_login:
 
@@ -92,6 +93,16 @@ def init_oauth(force_login=False):
 
 import urllib2
 import time
+import pprint
+import StringIO
+
+def pprint_to_str(obj):
+    """
+    Pretty print to a string buffer then return the string.
+    """
+    sb = StringIO.StringIO()
+    pp = pprint.pprint(obj, sb, 4)
+    return sb.getvalue()
 
 def twitter_retry(client, method, path, params):
     """
@@ -106,8 +117,11 @@ def twitter_retry(client, method, path, params):
     """
     retry_count = 0
     retry_delay = 0
+    exc = None
 
     while True:
+	do_retry = False
+
 	try:
 	    listreq = client.createRequest(path = path)
 	    if method == "post":
@@ -116,7 +130,18 @@ def twitter_retry(client, method, path, params):
 		result = listreq.get(params = params)
 	    return result
 
-	except urllib2.URLError:
+	except urllib2.HTTPError, e:
+	    #print >> sys.stderr, e.code
+	    #print >> sys.stderr, e.read()
+	    do_retry = e.code >= 500
+	    exc = e
+
+	except urllib2.URLError, e:
+	    #print >> sys.stderr, e.reason
+	    do_retry = True
+	    exc = e
+
+	if do_retry:
 	    if retry_count < 5:
 		retry_count += 1
 		retry_delay = retry_delay * 2 + 1
@@ -124,8 +149,8 @@ def twitter_retry(client, method, path, params):
 		print >> sys.stderr, "Retrying in %d seconds..." % retry_delay
 		time.sleep(retry_delay)
 		continue
-	    else:
-		raise
+
+	raise exc
 
 use_optparse = False
 try:
