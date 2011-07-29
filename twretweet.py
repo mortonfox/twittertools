@@ -6,6 +6,7 @@ import sys
 import time
 import pprint
 import twlib
+import urllib2
 
 def get_no_retweets(client):
     """
@@ -35,17 +36,29 @@ def get_usernames(client, userlist):
     Look up a list of up to 100 user IDs.
     Prints out screen names of users.
     """
+    if not userlist:
+	return
+
     users = ','.join([str(x) for x in userlist])
-    result = twlib.twitter_retry(client, 'get',
-	    path = '/1/users/lookup.json',
-	    params = { 'user_id' : users })
-    jsn = twlib.parse_json(result)
+    
+    try:
+	result = twlib.twitter_retry(client, 'get',
+		path = '/1/users/lookup.json',
+		params = { 'user_id' : users })
+	jsn = twlib.parse_json(result)
 
-#     pp = pprint.PrettyPrinter(indent=4)
-#     pp.pprint(jsn)
+    #     pp = pprint.PrettyPrinter(indent=4)
+    #     pp.pprint(jsn)
 
-    for user in jsn:
-	print user['screen_name']
+	for user in jsn:
+	    print user['screen_name']
+
+    except urllib2.HTTPError, (httperr):
+	print >> sys.stderr, 'Error looking up users: %s' % str(httperr)
+	jsn = twlib.parse_json(httperr.read())
+	pp = pprint.PrettyPrinter(indent=4)
+	pp.pprint(jsn)
+
 
     time.sleep(1)
 
