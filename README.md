@@ -7,6 +7,8 @@ This is a set of Twitter scripts and utilities.
  * mutual followers
  * users you're following but aren't following you back
  * followers you aren't following back
+ 
+* twfriend2.py - An update to twfriend.py that uses the new followers/ids, friends/ids, and users/lookup API calls.
 
 * twlistdump.py - Prints out all the members of a list.
 
@@ -14,3 +16,4 @@ This is a set of Twitter scripts and utilities.
 
 * twnotifs.py - Prints out users for whom you have phone notifications turned on.
 
+* twretweet.py - Show users for whom you have turned off retweets.
