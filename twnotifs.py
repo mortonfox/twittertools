@@ -20,7 +20,7 @@ def get_friends(client):
 	print >> sys.stderr, "Getting friends list - page %d..." % page
 
 	result = twlib.twitter_retry(client, 'get',
-		path='/1/friends/ids.json',
+		path='/1.1/friends/ids.json',
 		params = { "cursor" : str(cursor) } )
 
 	jsn = twlib.parse_json(result)
@@ -51,7 +51,7 @@ def get_notif(client, userlist):
     """
     users = ','.join([str(x) for x in userlist])
     result = twlib.twitter_retry(client, 'get',
-	    path = '/1/users/lookup.json',
+	    path = '/1.1/users/lookup.json',
 	    params = { 'user_id' : users })
     jsn = twlib.parse_json(result)
 
