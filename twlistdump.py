@@ -42,8 +42,12 @@ def get_pages(user, list, client):
 		user, list, page)
 
 	result = twlib.twitter_retry(client, 'get', 
-		path='/%s/%s/members.json' % (user, list),
-		params = { "cursor" : str(cursor) })
+		path='/1.1/lists/members.json',
+		params = { 
+		    'owner_screen_name' : user, 
+		    'slug' : list, 
+		    'cursor' : str(cursor)
+		})
 
 	cursor = process_result(result)
 	if cursor == 0: break
