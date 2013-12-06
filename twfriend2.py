@@ -29,7 +29,7 @@ def get_ids(client, what):
 	print >> sys.stderr, "Getting %s page %d..." % (what, page)
 
 	result = twlib.twitter_retry(client, 'get',
-		path='/1/%s/ids.json' % what,
+		path='/1.1/%s/ids.json' % what,
 		params = { "cursor" : str(cursor) } )
 	jsn = twlib.parse_json(result)
 	cursor = jsn['next_cursor']
@@ -53,7 +53,7 @@ def show_list(client, idlist, list_type):
 	print >> sys.stderr, 'Getting %s info page %d...' % (list_type, page)
 
 	result = twlib.twitter_retry(client, 'get',
-		path='/1/users/lookup.json',
+		path='/1.1/users/lookup.json',
 		params = { 'user_id' : ','.join(map(str, idlist[i : i+100])) })
 	jsn = twlib.parse_json(result)
 
