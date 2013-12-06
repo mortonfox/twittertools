@@ -10,8 +10,8 @@ This is a set of Twitter scripts and utilities.
  
 * twlistdump.py - Prints out all the members of a list.
 
-* twlistcheck.py - Check a list for protected users whom you aren't following. Optionally, remove those users from the list.
+* twlistcheck.py - Checks a list for protected users whom you aren't following. Optionally, remove those users from the list. (because you won't see their tweets in the list timeline anyway)
 
 * twnotifs.py - Prints out users for whom you have phone notifications turned on.
 
-* twretweet.py - Show users for whom you have turned off retweets.
+* twretweet.py - Prints out users for whom you have turned off retweets.
