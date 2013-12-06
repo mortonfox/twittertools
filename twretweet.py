@@ -13,7 +13,7 @@ def get_no_retweets(client):
     Get a list of user IDs for which you have turned off retweets.
     """
     result = twlib.twitter_retry(client, 'get',
-	    path='/1/friendships/no_retweet_ids.json',
+	    path='/1.1/friendships/no_retweets/ids.json',
 	    params = { } )
 
     jsn = twlib.parse_json(result)
@@ -43,7 +43,7 @@ def get_usernames(client, userlist):
     
     try:
 	result = twlib.twitter_retry(client, 'get',
-		path = '/1/users/lookup.json',
+		path = '/1.1/users/lookup.json',
 		params = { 'user_id' : users })
 	jsn = twlib.parse_json(result)
 
