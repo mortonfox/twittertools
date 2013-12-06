@@ -9,95 +9,67 @@ import pprint
 import twlib
 
 
-def process_result(str):
-    """
-    Process the JSON output from the Twitter API call.
-
-    Args:
-	str = JSON string to process
-
-    Returns:
-    	dict containing id -> screen_name pairs
-    """
-    jsn = twlib.parse_json(str)
-
-    cursor = jsn['next_cursor']
-
-#     pp = pprint.PrettyPrinter(indent=4)
-#     pp.pprint(jsn)
-
-    flist = {}
-    for user in jsn['users']:
-	flist[user['id']] = user['screen_name']
-    return (cursor, flist)
-
-
-def get_pages(client, what):
+def get_ids(client, what):
     """ 
-    Get all pages of friends or followers and add them to a dict.
+    Get all pages of friends or followers IDs and add them to a list.
 
     Args:
 	client = OAuth client
 	what = "friends" or "followers"
 
     Returns:
-    	dict containing id -> screen_name pairs
+    	list of ids
     """
-
     page = 0
     cursor = -1
-    flist = {}
+    idlist = []
 
     while True:
 	page += 1
 	print >> sys.stderr, "Getting %s page %d..." % (what, page)
 
 	result = twlib.twitter_retry(client, 'get',
-		path='/statuses/%s.json' % what,
+		path='/1.1/%s/ids.json' % what,
 		params = { "cursor" : str(cursor) } )
+	jsn = twlib.parse_json(result)
+	cursor = jsn['next_cursor']
+	idlist += jsn['ids']
 
-	(cursor, flist2) = process_result(result)
-	flist.update(flist2)  # Add to our cumulative dict.
-	if cursor == 0: break
+	if cursor == 0:
+	    break
 
 	time.sleep(1)
 
-    return flist
+    return idlist
 
-
-def show_friends(flist, list_type):
+def show_list(client, idlist, list_type):
     """
     Display a friends or followers list.
     """
-    print "%d %s:" % (len(flist), list_type)
-    i = 0
-    for id in flist.keys():
-	i += 1
-	print "%d: %s" % (i, flist[id])
+    namelist = []
+    page = 0
+    for i in xrange(0, len(idlist), 100):
+	page += 1
+	print >> sys.stderr, 'Getting %s info page %d...' % (list_type, page)
+
+	result = twlib.twitter_retry(client, 'get',
+		path='/1.1/users/lookup.json',
+		params = { 'user_id' : ','.join(map(str, idlist[i : i+100])) })
+	jsn = twlib.parse_json(result)
+
+# 	pp = pprint.PrettyPrinter(indent=4)
+# 	pp.pprint(jsn)
+
+	for user in jsn:
+	    namelist.append(user['screen_name'])
+
+	time.sleep(1)
+
+    count = len(namelist)
+    print '%d %s:' % (count, list_type)
+    for i in xrange(0, count):
+	print '%d: %s' % (i + 1, namelist[i])
     print
-
-
-def process_friends(friends, followers):
-    """
-    Seperate friends and followers lists into
-    mutual, only friends, and only followers lists.
-    """
-    mutual = {}
-    only_friends = {}
-    only_followers = {}
-
-    for id in friends.keys() + followers.keys():
-	if id in friends:
-	    if id in followers:
-		mutual[id] = friends[id]
-	    else:
-		only_friends[id] = friends[id]
-	elif id in followers:
-	    only_followers[id] = followers[id]
-
-    show_friends(mutual, "mutual friends")
-    show_friends(only_friends, "only friends")
-    show_friends(only_followers, "only followers")
 
 
 def main():
@@ -108,18 +80,20 @@ def main():
     
     client = twlib.init_oauth(args.login)
 
-    friends = get_pages(client, "friends")
+    friends = get_ids(client, 'friends')
+    followers = get_ids(client, 'followers')
 
-#     print "Friends:"
-#     pp = pprint.PrettyPrinter(indent=4)
-#     pp.pprint(friends)
+    friends_set = set(friends)
+    followers_set = set(followers)
 
-    followers = get_pages(client, "followers")
+    mutual_set = friends_set & followers_set
+    only_friends_set = friends_set - mutual_set
+    only_followers_set = followers_set - mutual_set
 
-#     print "Followers:"
-#     pp.pprint(followers)
+    show_list(client, list(mutual_set), 'mutual friends')
+    show_list(client, list(only_friends_set), 'only friends')
+    show_list(client, list(only_followers_set), 'only followers')
 
-    process_friends(friends, followers)
 
 if __name__ == '__main__':
     main()

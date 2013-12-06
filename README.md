@@ -8,8 +8,6 @@ This is a set of Twitter scripts and utilities.
  * users you're following but aren't following you back
  * followers you aren't following back
  
-* twfriend2.py - An update to twfriend.py that uses the new followers/ids, friends/ids, and users/lookup API calls.
-
 * twlistdump.py - Prints out all the members of a list.
 
 * twlistcheck.py - Check a list for protected users whom you aren't following. Optionally, remove those users from the list.
