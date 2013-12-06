@@ -49,8 +49,12 @@ def get_pages(user, list, client):
 		user, list, page)
 
 	result = twlib.twitter_retry(client, 'get',
-		path="/1/%s/%s/members.json" % (user, list),
-		params = { "cursor" : str(cursor) })
+		path='/1.1/lists/members.json',
+		params = { 
+		    'owner_screen_name' : user, 
+		    'slug' : list, 
+		    'cursor' : str(cursor)
+		})
 
 	( cursor, puser2 ) = process_result(result)
 
@@ -68,11 +72,11 @@ def delete_user(user, list, username, client):
     Remove a user from a list.
     """
     result = twlib.twitter_retry(client, 'post',
-	    path = '/1/%s/%s/members.json' % (user, list),
+	    path = '/1.1/lists/members/destroy.json',
 	    params = {
-		'list_id' : list,
-		'id' : username,
-		'_method' : 'DELETE',
+		'slug' : list,
+		'owner_screen_name' : user,
+		'screen_name' : username,
 	    })
     #print result
 
