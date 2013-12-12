@@ -51,7 +51,8 @@ def get_usernames(client, userlist):
     #     pp.pprint(jsn)
 
 	for user in jsn:
-	    print user['screen_name']
+            if user['following']:
+                print user['screen_name']
 
     except urllib2.HTTPError, (httperr):
 	print >> sys.stderr, 'Error looking up users: %s' % str(httperr)
