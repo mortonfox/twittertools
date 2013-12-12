@@ -1,6 +1,6 @@
 # twittertools
 
-This is a set of Twitter scripts and utilities.
+This is a set of command-line utilities for Twitter.
 
 * twfriend.py - Compares your following and followers and produces 3 lists:
 
