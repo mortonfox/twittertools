@@ -1,5 +1,7 @@
 """
 twlib.py - Module containing some shared functions.
+
+Author: Po Shan Cheah http://mortonfox.com
 """
 
 use_simplejson = False
