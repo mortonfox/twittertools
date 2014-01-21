@@ -1,6 +1,8 @@
 """
 twfriend.py - Categorize Twitter contacts according to whether they are
 mutual friends, only friends, or only followers.
+
+Author: Po Shan Cheah http://mortonfox.com
 """
 
 import sys
