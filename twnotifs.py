@@ -1,5 +1,8 @@
 """
 twnotifs.py - Show users for whom you have phone notifications.
+
+Author: Po Shan Cheah http://mortonfox.com
+
 """
 
 import sys
