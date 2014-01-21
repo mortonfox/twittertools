@@ -1,5 +1,8 @@
 """
 twretweet.py - Show users for whom you have turned off retweets.
+
+Author: Po Shan Cheah http://mortonfox.com
+
 """
 
 import sys
