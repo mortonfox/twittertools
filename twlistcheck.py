@@ -1,5 +1,8 @@
 """
 twlistcheck.py - Check Twitter list for protected users whom I'm not following.
+
+Author: Po Shan Cheah http://mortonfox.com
+
 """
 
 import sys
