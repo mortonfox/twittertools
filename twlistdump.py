@@ -1,5 +1,8 @@
 """
 twlistdump.py - Dump out Twitter lists for backup purposes.
+
+Author: Po Shan Cheah http://mortonfox.com
+
 """
 
 import sys
