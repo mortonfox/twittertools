@@ -166,8 +166,9 @@ class CmdlineParser:
     Wrapper for optparse and argparse. Offers a neutral interface that supports
     both command-line parsing modules and uses whichever one is available.
     """
-    def __init__(self, desc):
+    def __init__(self, desc, epilog = ''):
 	self.desc = desc
+        self.epilog = epilog
 	self.optionlist = []
 	self.paramlist = []
 
@@ -181,17 +182,18 @@ class CmdlineParser:
 	if use_optparse:
 	    usagestr = 'usage: %prog [options] ' + \
 		    ' '.join([x[0] for x in self.paramlist])
+
+            epilog = self.epilog
 		    
-	    paramhelp = None
 	    if len(self.paramlist) > 0:
-		paramhelp = 'Positional arguments: ' + \
+		epilog += '\n\nPositional arguments: ' + \
 			', '.join([x[0] + ' = ' + x[1] 
 			    for x in self.paramlist])
 
 	    parser = optparse.OptionParser(
-		    usage = usagestr, 
-		    description = self.desc,
-		    epilog = paramhelp)
+                usage = usagestr, 
+                description = self.desc,
+                epilog = epilog)
 
 	    for opt in self.optionlist:
 		parser.add_option(*opt[0], **opt[1])
@@ -206,7 +208,7 @@ class CmdlineParser:
 	    return options
 
 	else:
-	    parser = argparse.ArgumentParser(description = self.desc)
+	    parser = argparse.ArgumentParser(description = self.desc, epilog = self.epilog)
 
 	    for opt in self.optionlist:
 		parser.add_argument(*opt[0], **opt[1])

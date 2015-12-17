@@ -75,9 +75,16 @@ def show_list(client, idlist, list_type):
 
 
 def main():
-    parser = twlib.CmdlineParser(desc='Categorize Twitter friends/followers.')
+    parser = twlib.CmdlineParser(desc = 'Categorize Twitter friends/followers.',
+        epilog = 'If none of -m/-r/-o are specified, display all 3 categories.')
     parser.add_option('-l', '--login', action='store_true', 
-	    dest='login', default=False, help='Force OAuth login')
+        dest='login', default=False, help='Force OAuth login')
+    parser.add_option('-m', '--mutual', action='store_true',
+        dest='mutual', default=False, help='Show mutual friends')
+    parser.add_option('-r', '--only-friends', action='store_true',
+        dest='only_friends', default=False, help='Show only-friends')
+    parser.add_option('-o', '--only-followers', action='store_true',
+        dest='only_followers', default=False, help='Show only-followers')
     args = parser.do_parse()
     
     client = twlib.init_oauth(args.login)
@@ -92,9 +99,16 @@ def main():
     only_friends_set = friends_set - mutual_set
     only_followers_set = followers_set - mutual_set
 
-    show_list(client, list(mutual_set), 'mutual friends')
-    show_list(client, list(only_friends_set), 'only friends')
-    show_list(client, list(only_followers_set), 'only followers')
+    if not args.mutual and not args.only_friends and not args.only_followers:
+      # If none of the 3 options are specified, show everything.
+      args.mutual = args.only_friends = args.only_followers = True
+
+    if args.mutual:
+      show_list(client, list(mutual_set), 'mutual friends')
+    if args.only_friends:
+      show_list(client, list(only_friends_set), 'only friends')
+    if args.only_followers:
+      show_list(client, list(only_followers_set), 'only followers')
 
 
 if __name__ == '__main__':
