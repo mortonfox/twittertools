@@ -12,3 +12,25 @@ This is a set of command-line utilities for Twitter.
   tweets in the list timeline anyway)
 * twnotifs.py - Prints out users for whom you have phone notifications turned on.
 * twretweet.py - Prints out users for whom you have turned off retweets.
+
+## twfriend.py
+
+By default, twfriend displays all 3 friend/follow categories. You can control
+what twfriend displays using the -m, -r, and -o options. The -l option forces
+twfriend to perform another OAuth login to get a fresh token.
+
+    bash-4.3$ python twfriend.py -h
+    usage: twfriend.py [-h] [-l] [-m] [-r] [-o]
+
+    Categorize Twitter friends/followers.
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -l, --login           Force OAuth login
+    -m, --mutual          Show mutual friends
+    -r, --only-friends    Show only-friends
+    -o, --only-followers  Show only-followers
+
+    If none of -m/-r/-o are specified, display all 3 categories.
+    bash-4.3$
+
