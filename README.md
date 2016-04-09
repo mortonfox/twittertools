@@ -34,3 +34,26 @@ twfriend to perform another OAuth login to get a fresh token.
     If none of -m/-r/-o are specified, display all 3 categories.
     bash-4.3$
 
+
+## twlistcheck.py
+
+twlistcheck checks a Twitter list for protected users that you aren't
+following. Those users would be easy candidates to cut from the list since you
+can't see their tweets anyway. After displaying these users, twlistcheck can
+optionally remove those users from the list after a confirmation prompt.
+
+The -l option forces twlistcheck to perform another OAuth login to get a fresh token.
+
+    bash-4.3$ python twlistcheck.py -h
+    usage: twlistcheck.py [-h] [-l] user list
+
+    Check a Twitter list for protected users I'm not following.
+
+    positional arguments:
+    user         User name
+    list         List name
+
+    optional arguments:
+    -h, --help   show this help message and exit
+    -l, --login  Force OAuth login
+    bash-4.3$
