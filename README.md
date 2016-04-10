@@ -57,3 +57,25 @@ The -l option forces twlistcheck to perform another OAuth login to get a fresh t
     -h, --help   show this help message and exit
     -l, --login  Force OAuth login
     bash-4.3$
+
+## twlistdump.py
+
+twlistdump displays all the members of a list. You could use it to backup a
+list, for example, although there is no tool yet to restore a list saved in
+this way.
+
+The -l option forces twlistdump to perform another OAuth login to get a fresh token.
+
+    bash-4.3$ python twlistdump.py -h
+    usage: twlistdump.py [-h] [-l] user list
+
+    Dump a Twitter list.
+
+    positional arguments:
+    user         User name
+    list         List name
+
+    optional arguments:
+    -h, --help   show this help message and exit
+    -l, --login  Force OAuth login
+    bash-4.3$
