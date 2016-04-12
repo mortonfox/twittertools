@@ -86,6 +86,8 @@ twnotifs displays a list of users for whom you have SMS notifications turned
 on. This is useful if you want to prune your notifications list without waiting
 for each user to tweet to see for whom you have that setting enabled.
 
+The -l option forces twnotifs to perform another OAuth login to get a fresh token.
+
     bash-4.3$ python twnotifs.py -h
     usage: twnotifs.py [-h] [-l]
 
@@ -95,3 +97,7 @@ for each user to tweet to see for whom you have that setting enabled.
     -h, --help   show this help message and exit
     -l, --login  Force OAuth login
     bash-4.3$
+
+## twretweet.py
+
+
