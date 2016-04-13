@@ -100,4 +100,17 @@ The -l option forces twnotifs to perform another OAuth login to get a fresh toke
 
 ## twretweet.py
 
+twretweet displays a list of users on whom you have turned off retweets. You
+can use this list to see who could be considered for reenabling retweets.
 
+The -l option forces twretweet to perform another OAuth login to get a fresh token.
+
+    bash-4.3$ python twretweet.py -h
+    usage: twretweet.py [-h] [-l]
+
+    Show disabled retweets
+
+    optional arguments:
+    -h, --help   show this help message and exit
+    -l, --login  Force OAuth login
+    bash-4.3$
