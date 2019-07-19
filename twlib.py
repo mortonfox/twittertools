@@ -4,24 +4,9 @@ twlib.py - Module containing some shared functions.
 Author: Po Shan Cheah http://mortonfox.com
 """
 
-use_simplejson = False
-try:
-    import json
-except ImportError:
-    import simplejson
-    use_simplejson = True
-
-
+import json
 def parse_json(s):
-    """
-    Parse JSON string. This will work whether we have the simplejson or the
-    json library module.
-    """
-    if use_simplejson:
-        return simplejson.loads(s)
-    else:
-        return json.loads(s)
-
+    return json.loads(s)
 
 import oauthConsumer
 import webbrowser
