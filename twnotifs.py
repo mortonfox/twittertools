@@ -19,30 +19,30 @@ def get_friends(client):
     flist = {}
 
     while True:
-	page += 1
-	print >> sys.stderr, "Getting friends list - page %d..." % page
+        page += 1
+        print("Getting friends list - page %d..." % page, file=sys.stderr)
 
-	result = twlib.twitter_retry(client, 'get',
-		path='/1.1/friends/ids.json',
-		params = { "cursor" : str(cursor) } )
+        result = twlib.twitter_retry(client, 'get',
+                path='/1.1/friends/ids.json',
+                params = { "cursor" : str(cursor) } )
 
-	jsn = twlib.parse_json(result)
+        jsn = twlib.parse_json(result)
 
-	cursor = jsn['next_cursor']
+        cursor = jsn['next_cursor']
 
-# 	pp = pprint.PrettyPrinter(indent=4)
-# 	pp.pprint(jsn)
+#       pp = pprint.PrettyPrinter(indent=4)
+#       pp.pprint(jsn)
 
-	idlist = jsn['ids']
+        idlist = jsn['ids']
 
-	for i in xrange(0, len(idlist), 100):
-	    print >> sys.stderr, "User lookup for %d to %d..." % (i, i+100-1)
-	    idsublist = idlist[i:i+100]
-	    get_notif(client, idsublist)
+        for i in range(0, len(idlist), 100):
+            print("User lookup for %d to %d..." % (i, i+100-1), file=sys.stderr)
+            idsublist = idlist[i:i+100]
+            get_notif(client, idsublist)
 
-	if cursor == 0: break
+        if cursor == 0: break
 
-	time.sleep(1)
+        time.sleep(1)
 
     return 
 
@@ -54,16 +54,16 @@ def get_notif(client, userlist):
     """
     users = ','.join([str(x) for x in userlist])
     result = twlib.twitter_retry(client, 'get',
-	    path = '/1.1/users/lookup.json',
-	    params = { 'user_id' : users })
+            path = '/1.1/users/lookup.json',
+            params = { 'user_id' : users })
     jsn = twlib.parse_json(result)
 
 #     pp = pprint.PrettyPrinter(indent=4)
 #     pp.pprint(jsn)
 
     for user in jsn:
-	if user['notifications']:
-	    print user['screen_name']
+        if user['notifications']:
+            print(user['screen_name'])
 
     time.sleep(1)
 
@@ -71,7 +71,7 @@ def get_notif(client, userlist):
 def main():
     parser = twlib.CmdlineParser(desc='Show phone notifications')
     parser.add_option('-l', '--login', action='store_true', 
-	    dest='login', default=False, help='Force OAuth login')
+            dest='login', default=False, help='Force OAuth login')
     args = parser.do_parse()
     
     client = twlib.init_oauth(args.login)

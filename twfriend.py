@@ -16,31 +16,31 @@ def get_ids(client, what):
     Get all pages of friends or followers IDs and add them to a list.
 
     Args:
-	client = OAuth client
-	what = "friends" or "followers"
+        client = OAuth client
+        what = "friends" or "followers"
 
     Returns:
-    	list of ids
+        list of ids
     """
     page = 0
     cursor = -1
     idlist = []
 
     while True:
-	page += 1
-	print >> sys.stderr, "Getting %s page %d..." % (what, page)
+        page += 1
+        print("Getting %s page %d..." % (what, page), file=sys.stderr)
 
-	result = twlib.twitter_retry(client, 'get',
-		path='/1.1/%s/ids.json' % what,
-		params = { "cursor" : str(cursor) } )
-	jsn = twlib.parse_json(result)
-	cursor = jsn['next_cursor']
-	idlist += jsn['ids']
+        result = twlib.twitter_retry(client, 'get',
+                path='/1.1/%s/ids.json' % what,
+                params = { "cursor" : str(cursor) } )
+        jsn = twlib.parse_json(result)
+        cursor = jsn['next_cursor']
+        idlist += jsn['ids']
 
-	if cursor == 0:
-	    break
+        if cursor == 0:
+            break
 
-	time.sleep(1)
+        time.sleep(1)
 
     return idlist
 
@@ -50,28 +50,28 @@ def show_list(client, idlist, list_type):
     """
     namelist = []
     page = 0
-    for i in xrange(0, len(idlist), 100):
-	page += 1
-	print >> sys.stderr, 'Getting %s info page %d...' % (list_type, page)
+    for i in range(0, len(idlist), 100):
+        page += 1
+        print('Getting %s info page %d...' % (list_type, page), file=sys.stderr)
 
-	result = twlib.twitter_retry(client, 'get',
-		path='/1.1/users/lookup.json',
-		params = { 'user_id' : ','.join(map(str, idlist[i : i+100])) })
-	jsn = twlib.parse_json(result)
+        result = twlib.twitter_retry(client, 'get',
+                path='/1.1/users/lookup.json',
+                params = { 'user_id' : ','.join(map(str, idlist[i : i+100])) })
+        jsn = twlib.parse_json(result)
 
-# 	pp = pprint.PrettyPrinter(indent=4)
-# 	pp.pprint(jsn)
+#       pp = pprint.PrettyPrinter(indent=4)
+#       pp.pprint(jsn)
 
-	for user in jsn:
-	    namelist.append(user['screen_name'])
+        for user in jsn:
+            namelist.append(user['screen_name'])
 
-	time.sleep(1)
+        time.sleep(1)
 
     count = len(namelist)
-    print '%d %s:' % (count, list_type)
-    for i in xrange(0, count):
-	print '%d: %s' % (i + 1, namelist[i])
-    print
+    print('%d %s:' % (count, list_type))
+    for i in range(0, count):
+        print('%d: %s' % (i + 1, namelist[i]))
+    print()
 
 
 def main():

@@ -75,9 +75,9 @@ etc.
 
 """
 
-import urllib2
-import urllib
-from urlparse import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.request, urllib.parse, urllib.error
+from urllib.parse import urlparse
 from random import getrandbits
 from time import time
 import copy
@@ -90,7 +90,7 @@ import sys
 class Client ( object ):
 
   def __init__(self, key, secret, requestTokenURL, accessTokenURL,
-	  authorizeURL, callbackURL, host=None, useHttps=False ):
+          authorizeURL, callbackURL, host=None, useHttps=False ):
     """
       Initialize the client
 
@@ -147,10 +147,10 @@ class Client ( object ):
       "oauth_callback": self._callbackURL
     }
     req = Request( self._key, self._secret, "", params=params,
-	    path=self._requestTokenURL.path,
-	    host=self._requestTokenURL.netloc,
-	    useHttps=self._useHttps )
-    return self.handleRequestAuth( req.post( ) )
+            path=self._requestTokenURL.path,
+            host=self._requestTokenURL.netloc,
+            useHttps=self._useHttps )
+    return self.handleRequestAuth( req.post( ).decode('utf-8') )
 
   def handleRequestAuth ( self, data ):
     parts = data.split( "&" )
@@ -212,11 +212,11 @@ class Client ( object ):
       "oauth_verifier": oauth_verifier
     }
     req = Request( self._key, self._secret, oauth_token,
-	    sessionSecret = self._requestSecret,
-	    params=params, path=self._accessTokenURL.path,
-	    host=self._accessTokenURL.netloc,
-	    useHttps=self._useHttps )
-    return self.handleRequestSession( req.post( ) )
+            sessionSecret = self._requestSecret,
+            params=params, path=self._accessTokenURL.path,
+            host=self._accessTokenURL.netloc,
+            useHttps=self._useHttps )
+    return self.handleRequestSession( req.post( ).decode('utf-8') )
 
   def handleRequestSession ( self, data ):
     parts = data.split( "&" )
@@ -238,8 +238,8 @@ class Client ( object ):
       host = self._host
     if self._sessionToken:
       return Request( self._key, self._secret, self._sessionToken ,
-	      path=path, sessionSecret=self._sessionSecret, params=params,
-	      host=host, useHttps=self._useHttps )
+              path=path, sessionSecret=self._sessionSecret, params=params,
+              host=host, useHttps=self._useHttps )
     else:
       raise OauthException( "No Session Token" )
 
@@ -249,7 +249,7 @@ class Request ( object ):
   GET = "GET"
 
   def __init__( self, key, secret, token, sessionSecret="", path=None,
-	  host=None, params=None, useHttps=False ):
+          host=None, params=None, useHttps=False ):
     self.host = host
     self.path = path
     self.params = {}
@@ -294,21 +294,21 @@ class Request ( object ):
     url = "%s://%s%s" % ( self._protocol, host, path )
     # print >> sys.stderr, "url: %s" % url
     _params = { }
-    for k, v in params.iteritems( ):
+    for k, v in params.items( ):
         _params[ str( k ).encode( 'utf-8' ) ] =  v.encode( 'utf-8' )
     params = _params
-    data = urllib.urlencode( params )
+    data = urllib.parse.urlencode( params )
     if kind == self.POST:
-      req = urllib2.Request( url, data )
+      req = urllib.request.Request( url, bytes(data, 'ascii') )
     else:
-      req = urllib2.Request( "%s?%s" % ( url, data ) )
+      req = urllib.request.Request( "%s?%s" % ( url, data ) )
     """
     #DEBUG WITH HTTP PROXY LISTENER:
     proxy_handler = urllib2.ProxyHandler( { 'http':'127.0.0.1:8888' } )
     opener = urllib2.build_opener( proxy_handler )
     urllib2.install_opener( opener )
     """
-    resp = urllib2.urlopen( req )
+    resp = urllib.request.urlopen( req )
     result = resp.read( )
     return result
 
@@ -324,11 +324,11 @@ class Request ( object ):
     # print >> sys.stderr, "sig_: %s" % sig_
     hashKey = "&".join( ( self._secret, self._sessionSecret ) )
     # print >> sys.stderr, "hashKey: %s" % hashKey
-    hash = hmac.new( hashKey, sig_, hashlib.sha1 )
-    return base64.b64encode( hash.digest( ) )
+    hash = hmac.new( bytes(hashKey, 'ascii'), bytes(sig_, 'ascii'), hashlib.sha1 )
+    return base64.b64encode( hash.digest( ) ).decode('utf-8')
 
   def oauthEncode( self, binStr, safe ):
-      return urllib.quote( binStr.encode( 'utf-8' ), safe )
+      return urllib.parse.quote( binStr.encode( 'utf-8' ), safe )
 
   def getOauthEncodedValues( self, values ):
       #returns new list with oauth encoded values

@@ -25,9 +25,9 @@ def process_result(str):
 #     pp.pprint(jsn)
 
     for user in jsn['users']:
-	global count
-	count += 1
-	print "%d: %s %s" % (count, user['id'], user['screen_name'])
+        global count
+        count += 1
+        print("%d: %s %s" % (count, user['id'], user['screen_name']))
 
     return cursor
 
@@ -40,28 +40,28 @@ def get_pages(user, list, client):
     page = 0
 
     while True:
-	page += 1
-	print >> sys.stderr, "Getting %s/%s list members page %s..." % (
-		user, list, page)
+        page += 1
+        print("Getting %s/%s list members page %s..." % (
+                user, list, page), file=sys.stderr)
 
-	result = twlib.twitter_retry(client, 'get', 
-		path='/1.1/lists/members.json',
-		params = { 
-		    'owner_screen_name' : user, 
-		    'slug' : list, 
-		    'cursor' : str(cursor)
-		})
+        result = twlib.twitter_retry(client, 'get', 
+                path='/1.1/lists/members.json',
+                params = { 
+                    'owner_screen_name' : user, 
+                    'slug' : list, 
+                    'cursor' : str(cursor)
+                })
 
-	cursor = process_result(result)
-	if cursor == 0: break
+        cursor = process_result(result)
+        if cursor == 0: break
 
-	time.sleep(1)
+        time.sleep(1)
 
 
 def main():
     parser = twlib.CmdlineParser(desc='Dump a Twitter list.')
     parser.add_option('-l', '--login', action='store_true', 
-	    dest='login', default=False, help='Force OAuth login')
+            dest='login', default=False, help='Force OAuth login')
     parser.add_param('user', help="User name")
     parser.add_param('list', help="List name")
     args = parser.do_parse()
